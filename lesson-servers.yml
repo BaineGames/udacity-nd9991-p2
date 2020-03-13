@@ -123,3 +123,7 @@ Resources:
       VpcId: 
         Fn::ImportValue:
           Fn::Sub: "${EnvironmentName}-VPCID"
+  Outputs:
+    EndpointURL:
+        Description: The public url to the applications load balancer
+        Value: !Join ["http://" , !GetAtt WebAppLB.DNSName ]
