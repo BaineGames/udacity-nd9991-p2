@@ -87,6 +87,9 @@ Resources:
       - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
       SecurityGroups:
       - Ref: LBSecGroup
+    LoadBalancerAttributes:
+      - Key: 'idle_timeout.timeout_seconds'
+        Value: 120
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
