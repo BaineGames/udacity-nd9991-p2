@@ -45,6 +45,33 @@ Resources:
         FromPort: 0
         ToPort: 65535
         CidrIp: 0.0.0.0/0
+  AdminRootRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+        - PolicyName: 'root'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: '*'
+                  Resource: '*'
+  AdminRootForWebConfig:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: '/'
+      Roles:
+        - Ref: 'AdminRootRole'
   WebAppLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -59,7 +86,8 @@ Resources:
           aws s3 cp s3://udacity-demo-1/udacity.zip .
           unzip -o udacity.zip
       ImageId: ami-0d1cd67c26f5fca19
-      KeyName: aws-key
+      IamInstanceProfile:
+        Ref: AdminRootForWebConfig
       SecurityGroups:
       - Ref: WebServerSecGroup
       InstanceType: t3.small
@@ -87,9 +115,9 @@ Resources:
       - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
       SecurityGroups:
       - Ref: LBSecGroup
-    LoadBalancerAttributes:
-      - Key: 'idle_timeout.timeout_seconds'
-        Value: 120
+      LoadBalancerAttributes:
+        - Key: 'idle_timeout.timeout_seconds'
+          Value: 120
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
