@@ -13,7 +13,7 @@ Resources:
       GroupDescription: Allow http to our load balancer
       VpcId:
         Fn::ImportValue:
-          !Sub "${EnvironmentName}-VPCID"
+          !Sub ${EnvironmentName}-VPCID
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 80
@@ -24,17 +24,25 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIpv6: ::/0
   WebServerSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow http to our hosts and SSH from local only
       VpcId:
         Fn::ImportValue:
-          !Sub "${EnvironmentName}-VPCID"
+          !Sub ${EnvironmentName}-VPCID
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 8080
-        ToPort: 8080
+        FromPort: 80
+        ToPort: 80
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         FromPort: 22
@@ -65,7 +73,7 @@ Resources:
             Statement:
               - Effect: 'Allow'
                 Action: '*'
-                  Resource: '*'
+                Resource: '*'
   AdminRootForWebConfig:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
@@ -86,6 +94,7 @@ Resources:
           aws s3 cp s3://udacity-demo-1/udacity.zip .
           unzip -o udacity.zip
       ImageId: ami-0d1cd67c26f5fca19
+      KeyName: sandbox-pair
       IamInstanceProfile:
         Ref: AdminRootForWebConfig
       SecurityGroups:
@@ -100,7 +109,7 @@ Resources:
     Properties:
       VPCZoneIdentifier:
       - Fn::ImportValue: 
-          !Sub "${EnvironmentName}-PRIV-NETS"
+          !Sub ${EnvironmentName}-PRIV-NETS
       LaunchConfigurationName:
         Ref: WebAppLaunchConfig
       MinSize: '2'
@@ -111,13 +120,10 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Subnets:
-      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
-      - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
+      - Fn::ImportValue: !Sub ${EnvironmentName}-PUB1-SN
+      - Fn::ImportValue: !Sub ${EnvironmentName}-PUB2-SN
       SecurityGroups:
       - Ref: LBSecGroup
-      LoadBalancerAttributes:
-        - Key: 'idle_timeout.timeout_seconds'
-          Value: 120
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -148,12 +154,12 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 8
       HealthyThresholdCount: 2
-      Port: 8080
+      Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId: 
         Fn::ImportValue:
-          Fn::Sub: "${EnvironmentName}-VPCID"
+          Fn::Sub: ${EnvironmentName}-VPCID
 Outputs:
     EndpointURL:
         Description: The public url to the applications load balancer
