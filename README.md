@@ -1,6 +1,9 @@
 # udacity-nd9991-p2
 Udacity Cloud DevOps Engineer Project 2 - CloudFormation
 
+## Link to See it Live for submission
+http://p2-se-webap-xov7jpqircfk-1024648911.us-west-2.elb.amazonaws.com/
+
 
 ## Deploy Network
 
